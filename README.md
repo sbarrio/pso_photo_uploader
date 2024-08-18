@@ -33,4 +33,5 @@ Sorry for the Y2K quality, but these were taken from a CRT off-screen. They are 
 <img width=500 src="doc/image5.jpeg">
 
 Testing hardware:
+
 <img width=500 src="doc/image6.jpeg">
