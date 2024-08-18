@@ -6,14 +6,14 @@ This is a simple node js app that sets up exposes a basic HTML4-compliant page t
 
 This is basically the same thing that good old http://pso.donut-dhs.org did back in the day. Since it appears to be offline (as of August 2024) I decided to create an open source app that replicates its functionality in the hopes of me deploying this on a cheap server for everybody to use or at least make it available for somebody to deploy it themselves.
 
-#### Sources
+#### Sources
 
 pso.donut-dhs.org: https://web.archive.org/web/20080122060628/http://pso.donut.dhs.org/
 PSO Proxy: https://psoproxy.sourceforge.net/
 
 Special thanks for the image conversion code on PSO Proxy which is still miraculously available.
 
-#### Caveats
+#### Caveats
 
 To make this production ready I would add a periodic task to delete generated files every x minutes, slow enough to allow users to snap their pictures via QR code leisurely but fast enough to avoid bloating the server and consuming too much disk space. The page styling could definitely be prettier.
 
