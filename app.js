@@ -5,7 +5,7 @@ const QRCode = require('qrcode');
 const { generateBitmap } = require('./convert');
 
 const app = express()
-const API_PORT = 3000;
+const API_PORT = 80;
 
 const MIN_CONTENT_LENGTH_BYTES = 1000;
 const MAX_PHOTO_SIZE_BYTES = 164391; // ~165 KB
