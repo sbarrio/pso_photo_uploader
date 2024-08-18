@@ -26,7 +26,7 @@ Special thanks for the image conversion code on PSO Proxy which is still miracul
 - Now, go back to the Title Screen and select "Webpage".
 - Tap on the Front Page mentioning that you need to buy a Hunter's License to play (🥲)
 - If everything is correctly set you should reach the Upload page (see screenshots below)
-- From there, just tap on **Send Image**, if you have a valid snapshots tored on Memory Card B it will be uploaded to the server and you'll be redirected to a page containing said image and a QR code. If you scan that code you can easily download the image on your smartphone as a convenient .png file.
+- From there, just tap on **Send Image**. If you have a valid snapshot stored on Memory Card B it will be uploaded to the server and you'll be redirected to a page containing said image and a QR code. If you scan that code you can easily download the image on your smartphone as a convenient .png file.
 
 ### Example output
 
