@@ -13,17 +13,32 @@ This is basically the same thing that good old http://pso.donut-dhs.org did back
 
 Special thanks for the image conversion code on PSO Proxy which is still miraculously available.
 
+### Usage
+
+- Clone the repo on your computer, run **npm install** and **node app.js** to launch the app
+- The default PORT is 3000 but you can change it to whatever you want directly on app.js
+- Launch PSO on your Gamecube, make sure you are able to reach the internet via Modem or BBA.
+- Go to Options, Network Configuration and create a new connection profile (no need to overwrite your normal connection settings)
+- Set everything to automatic (just keep pressing on **Next**) until you reach the proxy settings page.
+- There, set the proxy address as your machine's ip and the selected port you want to use (3000 is the default one), for example:
+  - **Address:** 192.168.1.200
+  - **Port**: 3000
+- Now, go back to the Title Screen and select "Webpage".
+- Tap on the Front Page mentioning that you need to buy a Hunter's License to play (🥲)
+- If everything is correctly set you should reach the Upload page (see screenshots below)
+- From there, just tap on **Send Image**, if you have a valid snapshots tored on Memory Card B it will be uploaded to the server and you'll be redirected to a page containing said image and a QR code. If you scan that code you can easily download the image on your smartphone as a convenient .png file.
+
+### Example output
+
+<img src="doc/image0.jpeg">
+
 ### Caveats
 
 To make this production ready I would add a periodic task to delete generated files every x minutes, slow enough to allow users to snap their pictures via QR code leisurely but fast enough to avoid bloating the server and consuming too much disk space. The page styling could definitely be prettier.
 
 It would also be cool to make it work for the Dreamcast versions as well (sadly I don't have a DreamPi to test it with yet).
 
-### Example output
-
-<img src="doc/image0.jpeg">
-
-### Operation example
+### Screenshots
 
 Sorry for the Y2K quality, but these were taken from a CRT off-screen. They are as authentic as they can be :D
 
