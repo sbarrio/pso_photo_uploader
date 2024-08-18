@@ -5,7 +5,7 @@ const QRCode = require('qrcode');
 const { generateBitmap } = require('./convert');
 
 const app = express()
-const API_PORT = 80;
+const API_PORT = 3000;
 
 const MIN_CONTENT_LENGTH_BYTES = 1000;
 const MAX_PHOTO_SIZE_BYTES = 164391; // ~165 KB
@@ -38,7 +38,7 @@ app.get('/', (req, res) => {
 
 app.post('/submit', (req, res) => {
     let rawData = [];
-    let uploadedPohotoURL = "";
+    let uploadedPhotoURL = "";
 
     req.on('data', (chunk) => {
         // Chunks must be treated as bytes, not strings
@@ -88,20 +88,21 @@ app.post('/submit', (req, res) => {
                         const filePath = path.join(UPLOAD_DIR, filename);
 
                         generateBitmap(fileData, filePath);
-                        uploadedPohotoURL = filePath;
+                        uploadedPhotoPath = "/uploads/" + filename; 
+                        uploadedPhotoURL = "http://" + req.socket.localAddress.replace("::ffff:", "") + ":" + API_PORT + uploadedPhotoPath;
                     }
                 }
             });
 
-            if (uploadedPohotoURL.length > 0) {
+            if (uploadedPhotoURL.length > 0) {
                 const fileName = `qrcode-${Date.now()}.png`;
                 const qrFilePath = path.join(QR_DIR, fileName);
-                QRCode.toFile(qrFilePath, uploadedPohotoURL, { errorCorrectionLevel: 'H' }, (err) => {
+                QRCode.toFile(qrFilePath, uploadedPhotoURL, { errorCorrectionLevel: 'H' }, (err) => {
                     if (err) res.send('Error generating QR Code');
-                    res.send(`<h1>Thank you!</h1><p>Your photo was succesfully uploaded.</p><p>You can access it via this QR Code:</p><img src="/qr_codes/${fileName}"/><p>URL: <a href="${uploadedPohotoURL}>${uploadedPohotoURL}</a></p>"> <br> <a href="/">Upload another snapshot</a>`);   
+                    res.send(`<h1>Thank you!</h1><p>Your photo was succesfully uploaded.</p> <img src="${uploadedPhotoPath}" /> <p>You can access it via this QR Code:</p> <img src="/qr_codes/${fileName}"/> <br> <a href="/">Upload another snapshot</a>`);   
                 });
             } else {
-                res.send(`<h1>WAT</h1><p>Your photo was succesfully uploaded, but I can find the path where it was stored....</p><p>sorry.</p><a href="/">Try again maybe?</a>`);   
+                res.send(`<h1>WAT</h1><p>Your photo was succesfully uploaded, but I can't find the path where it was stored....</p><p>Sorry.</p><a href="/">Try again, maybe?</a>`);   
             }
 
         } catch(error) {
