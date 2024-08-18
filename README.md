@@ -23,6 +23,7 @@ Special thanks for the image conversion code on PSO Proxy which is still miracul
 - There, set the proxy address as your machine's ip and the selected port you want to use (3000 is the default one), for example:
   - **Address:** 192.168.1.200
   - **Port**: 3000
+  - **NOTE**: If you have deployed the server app elsewhere you'll need to set the adress to your hostname.
 - Now, go back to the Title Screen and select "Webpage".
 - Tap on the Front Page mentioning that you need to buy a Hunter's License to play (🥲)
 - If everything is correctly set you should reach the Upload page (see screenshots below)
