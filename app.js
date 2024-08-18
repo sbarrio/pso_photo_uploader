@@ -1,39 +1,35 @@
 const express = require('express')
 const path = require('path');
 const fs = require('fs');
-const { generateBitmap } = require('./convert');
 const QRCode = require('qrcode');
+const { generateBitmap } = require('./convert');
 
 const app = express()
 const API_PORT = 3000;
+const HOSTNAME = process.env.HOSTNAME || undefined;
+
 const MIN_CONTENT_LENGTH_BYTES = 1000;
 const MAX_PHOTO_SIZE_BYTES = 164391; // ~165 KB
 const UPLOAD_DIR = path.join(__dirname, 'public/uploads');
 const QR_DIR = path.join(__dirname, 'public/qr_codes');
-const HOSTNAME = process.env.HOSTNAME || undefined;
-// const WORK_UPLOAD_DIR = path.join(__dirname, 'uploads');
-
-function splitBuffer(buffer, boundary) {
-    let parts = [];
-    let currentIndex = 0;
-    let boundaryIndex;
-
-    while ((boundaryIndex = buffer.indexOf(boundary, currentIndex)) !== -1) {
-        parts.push(buffer.slice(currentIndex, boundaryIndex));
-        currentIndex = boundaryIndex + boundary.length;
-    }
-
-    parts.push(buffer.slice(currentIndex));
-    return parts;
-}
+const WORK_UPLOAD_DIR = path.join(__dirname, 'uploads');
 
 if (!fs.existsSync(UPLOAD_DIR)) {
     fs.mkdirSync(UPLOAD_DIR);
 }
 
+if (!fs.existsSync(QR_DIR)) {
+    fs.mkdirSync(QR_DIR);
+}
+
+if (!fs.existsSync(WORK_UPLOAD_DIR)) {
+    fs.mkdirSync(WORK_UPLOAD_DIR);
+}
+
 app.use(express.static('public'));
 
-app.get('/redirector', (req, res) => {
+// URL that gets requested from playsega's front page, so we simply redirect to our index.html
+app.get('/redirector', (_req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
@@ -46,6 +42,7 @@ app.post('/submit', (req, res) => {
     let uploadedPohotoURL = "";
 
     req.on('data', (chunk) => {
+        // Chunks must be treated as bytes, not strings
         rawData.push(chunk);
     });
 
@@ -68,13 +65,12 @@ app.post('/submit', (req, res) => {
 
             rawData = Buffer.concat(rawData);
 
-            // For debugging
+            // DEBUG
             //const rawDataPath = path.join(WORK_UPLOAD_DIR, 'raw_data');
             //fs.writeFileSync(rawDataPath, rawData);
 
             const boundary = '--' + req.headers['content-type'].split('; ')[1].replace('boundary=', '');
             const boundaryBuffer = Buffer.from(boundary);
-
             const parts = splitBuffer(rawData, boundaryBuffer).filter(part => part.length > 0);
 
             parts.forEach(part => {
@@ -104,7 +100,7 @@ app.post('/submit', (req, res) => {
                 const qrFilePath = path.join(QR_DIR, fileName);
                 QRCode.toFile(qrFilePath, uploadedPohotoURL, { errorCorrectionLevel: 'H' }, (err) => {
                     if (err) res.send('Error generating QR Code');
-                    res.send(`<h1>Thank you!</h1><p>Your photo was succesfully uploaded.</p><p>You can access it via this QR Code:</p><img src="/qr_codes/${fileName}"/> <br> <a href="/">Send another one</a>`);   
+                    res.send(`<h1>Thank you!</h1><p>Your photo was succesfully uploaded.</p><p>You can access it via this QR Code:</p><img src="/qr_codes/${fileName}"/><p>URL: <a href="${uploadedPohotoURL}>${uploadedPohotoURL}</a></p>"> <br> <a href="/">Upload another snapshot</a>`);   
                 });
             } else {
                 res.send(`<h1>WAT</h1><p>Your photo was succesfully uploaded, but I can find the path where it was stored....</p><p>sorry.</p><a href="/">Try again maybe?</a>`);   
@@ -120,3 +116,19 @@ app.post('/submit', (req, res) => {
 app.listen(API_PORT, () => {
     console.log(`App listening on port ${API_PORT}`);
 });
+
+// Helper functions
+
+function splitBuffer(buffer, boundary) {
+    let parts = [];
+    let currentIndex = 0;
+    let boundaryIndex;
+
+    while ((boundaryIndex = buffer.indexOf(boundary, currentIndex)) !== -1) {
+        parts.push(buffer.slice(currentIndex, boundaryIndex));
+        currentIndex = boundaryIndex + boundary.length;
+    }
+
+    parts.push(buffer.slice(currentIndex));
+    return parts;
+}
