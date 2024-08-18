@@ -10,7 +10,7 @@ const MIN_CONTENT_LENGTH_BYTES = 1000;
 const MAX_PHOTO_SIZE_BYTES = 164391; // ~165 KB
 const UPLOAD_DIR = path.join(__dirname, 'public/uploads');
 const QR_DIR = path.join(__dirname, 'public/qr_codes');
-const WORK_UPLOAD_DIR = path.join(__dirname, 'uploads');
+// const WORK_UPLOAD_DIR = path.join(__dirname, 'uploads');
 
 function splitBuffer(buffer, boundary) {
     let parts = [];
@@ -67,8 +67,9 @@ app.post('/submit', (req, res) => {
 
             rawData = Buffer.concat(rawData);
 
-            const rawDataPath = path.join(WORK_UPLOAD_DIR, 'raw_data');
-            fs.writeFileSync(rawDataPath, rawData);
+            // For debugging
+            //const rawDataPath = path.join(WORK_UPLOAD_DIR, 'raw_data');
+            //fs.writeFileSync(rawDataPath, rawData);
 
             const boundary = '--' + req.headers['content-type'].split('; ')[1].replace('boundary=', '');
             const boundaryBuffer = Buffer.from(boundary);
