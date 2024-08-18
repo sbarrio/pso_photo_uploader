@@ -10,6 +10,7 @@ const MIN_CONTENT_LENGTH_BYTES = 1000;
 const MAX_PHOTO_SIZE_BYTES = 164391; // ~165 KB
 const UPLOAD_DIR = path.join(__dirname, 'public/uploads');
 const QR_DIR = path.join(__dirname, 'public/qr_codes');
+const HOSTNAME = process.env.HOSTNAME || undefined;
 // const WORK_UPLOAD_DIR = path.join(__dirname, 'uploads');
 
 function splitBuffer(buffer, boundary) {
@@ -82,9 +83,8 @@ app.post('/submit', (req, res) => {
                     const name = nameMatch ? nameMatch[1] : null;
 
                     if (name === 'gcfile') {
-                        const filenameGC = part.toString().split("filename=")[1].split('\r\n\r\n\r\n')[0].split("&")[0];
                         const timestamp = new Date().getTime();
-                        const filename = (filenameGC || 'uploaded_file') + "_" + timestamp + ".png";
+                        const filename = "PSO_SCREEN_" + timestamp + ".png";
 
                         // Isolate the binary data by finding the position after the headers
                         const headerEndIndex = part.toString().indexOf('\r\n\r\n') + 4;
@@ -93,7 +93,8 @@ app.post('/submit', (req, res) => {
                         const filePath = path.join(UPLOAD_DIR, filename);
 
                         generateBitmap(fileData, filePath);
-                        uploadedPohotoURL = "http://" + req.socket.localAddress.replace("::ffff:", "") + ":" + API_PORT + "/uploads/" + filename;
+                        const host = HOSTNAME || req.socket.localAddress.replace("::ffff:", "");
+                        uploadedPohotoURL = "http://" + host + ":" + API_PORT + "/uploads/" + filename;
                     }
                 }
             });
