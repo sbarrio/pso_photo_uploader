@@ -1,0 +1,13 @@
+{
+    "name": "pso-photo-sender",
+    "version": "1.0.0",
+    "description": "A simple photo uploader for PSO Episodes 1,2 and 3 on Gamecube",
+    "main": "app.js",
+    "author": "sbarrio",
+    "license": "ISC",
+    "dependencies": {
+        "express": "4.19.2",
+        "pngjs": "7.0.0",
+        "qrcode": "1.5.4"
+    }
+}
