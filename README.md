@@ -8,8 +8,8 @@ This is basically the same thing that good old http://pso.donut-dhs.org did back
 
 ### Sources
 
-pso.donut-dhs.org: https://web.archive.org/web/20080122060628/http://pso.donut.dhs.org/
-PSO Proxy: https://psoproxy.sourceforge.net/
+- pso.donut-dhs.org: https://web.archive.org/web/20080122060628/http://pso.donut.dhs.org/
+- PSO Proxy: https://psoproxy.sourceforge.net/
 
 Special thanks for the image conversion code on PSO Proxy which is still miraculously available.
 
