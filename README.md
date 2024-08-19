@@ -41,7 +41,7 @@ It would also be cool to make it work for the Dreamcast versions as well (sadly 
 
 ### Screenshots
 
-Sorry for the Y2K quality, but these were taken from a CRT off-screen. They are as authentic as they can be :D
+Sorry for the Y2K quality, but these were taken directly from a CRT. They are as authentic as they can be :D
 
 <img width=500 src="doc/image1.jpeg">
 <img width=500 src="doc/image2.jpeg">
