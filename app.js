@@ -28,7 +28,7 @@ if (!fs.existsSync(WORK_UPLOAD_DIR)) {
     fs.mkdirSync(WORK_UPLOAD_DIR);
 }
 
-// Periodicc deletion task
+// Periodic deletion task
 setInterval(() => {
     const now = Date.now();
     console.log("Launching deletion task - " + now);
