@@ -1,6 +1,6 @@
 ## PSO Photo Uploader
 
-This is a simple node js app that sets up exposes a basic HTML4-compliant page that enables Gamecube players of Phantasy Star Online Episode 1&2 to upload their in-game snapshots from their memory cards to a modern web server. They can then retrieve them by either snapping the generated png file directly from the server (if they are running it on their own machine) or by accessing a public url in the shape of a generated QR Code in case this is running elsewhere.
+This is a simple node js app that sets up and exposes a basic HTML4-compliant page that enables Gamecube players of Phantasy Star Online Episode 1&2 to upload their in-game snapshots from their memory cards to a modern web server. They can then retrieve them by either snapping the generated png file directly from the server (if they are running it on their own machine) or by accessing a public url in the shape of a generated QR Code in case this is running elsewhere.
 
 ### Motivation
 
