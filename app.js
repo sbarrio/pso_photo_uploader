@@ -12,7 +12,10 @@ const MAX_PHOTO_SIZE_BYTES = 164391; // ~165 KB
 const UPLOAD_DIR = path.join(__dirname, 'public/uploads');
 const QR_DIR = path.join(__dirname, 'public/qr_codes');
 const WORK_UPLOAD_DIR = path.join(__dirname, 'uploads');
+const MAX_FILE_FILETIME_MS = 30 * 60 * 1000 // 30 minutes in MS
+const DELETION_TASK_INTERVAL_MS = 5 * 60 * 1000; // Runs every 5 minutes
 
+// File management
 if (!fs.existsSync(UPLOAD_DIR)) {
     fs.mkdirSync(UPLOAD_DIR);
 }
@@ -24,6 +27,19 @@ if (!fs.existsSync(QR_DIR)) {
 if (!fs.existsSync(WORK_UPLOAD_DIR)) {
     fs.mkdirSync(WORK_UPLOAD_DIR);
 }
+
+// Periodicc deletion task
+setInterval(() => {
+    const now = Date.now();
+    console.log("Launching deletion task - " + now);
+
+    try {
+        deleteOldFilesFrom(now, UPLOAD_DIR);
+        deleteOldFilesFrom(now, QR_DIR);
+    } catch(error) {
+        console.log("Deletion task Error: " + error);
+    }
+}, DELETION_TASK_INTERVAL_MS);
 
 app.use(express.static('public'));
 
@@ -95,7 +111,7 @@ app.post('/submit', (req, res) => {
             });
 
             if (uploadedPhotoURL.length > 0) {
-                const fileName = `qrcode-${Date.now()}.png`;
+                const fileName = `qrcode-${Date.now().getTime()}.png`;
                 const qrFilePath = path.join(QR_DIR, fileName);
                 QRCode.toFile(qrFilePath, uploadedPhotoURL, { errorCorrectionLevel: 'H' }, (err) => {
                     if (err) res.send('Error generating QR Code');
@@ -130,4 +146,31 @@ function splitBuffer(buffer, boundary) {
 
     parts.push(buffer.slice(currentIndex));
     return parts;
+}
+
+function deleteOldFilesFrom(now, dirPath) {
+    fs.readdir(dirPath, (err, files) => {
+        if (err) {
+            console.log("Error deleting files from: " + dirPath);
+            throw err;
+        }
+
+        files.forEach(file => {
+            const filePath = path.join(dirPath, file);
+            fs.stat(filePath, (err, stats) => {
+                if (err) {
+                    console.log("Error reading: " + filePath + " for deletion");
+                }
+
+                if (now - stats.mtimeMs > MAX_FILE_FILETIME_MS) {
+                    fs.unlink(filePath, err => {
+                        if (err) {
+                            console.log("Error deleting: " + filePath);
+                        }
+                        console.log("Deleted outdated file: " + filePath);
+                    })
+                }
+            });
+        });
+    });
 }
