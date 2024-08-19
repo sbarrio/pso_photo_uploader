@@ -35,8 +35,8 @@ Special thanks for the image conversion code on PSO Proxy which is still miracul
 
 ### Caveats
 
-- It would also be cool to make it work for the Dreamcast versions as well (sadly I don't have a DreamPi to test it with yet). 
 - Episode 3 support should be easy enough too, but I haven't had the time to test it yet.
+- It would be cool to make it work for the Dreamcast versions as well (sadly I don't have a DreamPi to test it with yet). 
 - The page styling could definitely be prettier too.
 
 ### Screenshots
