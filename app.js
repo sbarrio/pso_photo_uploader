@@ -13,7 +13,7 @@ const MAX_PHOTO_SIZE_BYTES = 164391; // ~165 KB
 const UPLOAD_DIR = path.join(__dirname, 'public/uploads');
 const QR_DIR = path.join(__dirname, 'public/qr_codes');
 const WORK_UPLOAD_DIR = path.join(__dirname, 'uploads');
-const MAX_FILE_FILETIME_MS = 24 * 60 * 60 * 1000 // 24 hours in ms
+const MAX_FILE_FILETIME_MS = 7 * 24 * 60 * 60 * 1000 // 7 days in ms
 const DELETION_TASK_INTERVAL_MS = 60 * 60 * 1000; // 1 hour in ms
 
 // File management
@@ -181,7 +181,7 @@ app.post('/submit', (req, res) => {
                         res.send('Error generating QR Code');
                     } else {
                         console.log(getFormattedDate(new Date()) + " - Generated QR: " + fileName);
-                        res.send(`<h1>Thank you!</h1><p>Your photo was succesfully uploaded.</p><p>It will be deleted after 24 hours.</p> <img src="${uploadedPhotoPath}" /> <p>You can access it via this QR Code:</p> <img src="/qr_codes/${fileName}"/> <br> <a href="/">Upload another snapshot</a> <br> <a href="/gallery">Gallery</a>`);   
+                        res.send(`<h1>Thank you!</h1><p>Your photo was succesfully uploaded.</p><p>It will be deleted after a week.</p> <img src="${uploadedPhotoPath}" /> <p>You can access it via this QR Code:</p> <img src="/qr_codes/${fileName}"/> <br> <a href="/">Upload another snapshot</a> <br> <a href="/gallery">Gallery</a>`);   
                     }
                 });
             } else {
