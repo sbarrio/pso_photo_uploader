@@ -4,7 +4,7 @@ This is a simple node js app that sets up and exposes a basic HTML4-compliant pa
 
 ### Motivation
 
-This is basically the same thing that good old http://pso.donut-dhs.org did back in the day. Since it appears to be offline (as of August 2024) I decided to create an open source app that replicates its functionality in the hopes of me deploying this on a cheap server for everybody to use or at least make it available for somebody to deploy it themselves.
+This is basically the same thing that good old http://pso.donut-dhs.org did back in the day. Since it appears to be offline (as of August 2024) I decided to create an open source app that replicates its functionality. I've also deployed it for the world to use at http://103.45.245.145:3000
 
 ### Sources
 
