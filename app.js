@@ -111,7 +111,7 @@ app.post('/submit', (req, res) => {
             });
 
             if (uploadedPhotoURL.length > 0) {
-                const fileName = `qrcode-${Date.now().getTime()}.png`;
+                const fileName = `qrcode-${Date.now()}.png`;
                 const qrFilePath = path.join(QR_DIR, fileName);
                 QRCode.toFile(qrFilePath, uploadedPhotoURL, { errorCorrectionLevel: 'H' }, (err) => {
                     if (err) res.send('Error generating QR Code');
