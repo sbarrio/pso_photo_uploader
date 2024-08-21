@@ -181,7 +181,7 @@ app.post('/submit', (req, res) => {
                         res.send('Error generating QR Code');
                     } else {
                         console.log(getFormattedDate(new Date()) + " - Generated QR: " + fileName);
-                        res.send(`<h1>Thank you!</h1><p>Your photo was succesfully uploaded.</p><p>It will be deleted after a week.</p> <img src="${uploadedPhotoPath}" /> <p>You can access it via this QR Code:</p> <img src="/qr_codes/${fileName}"/> <br> <a href="/">Upload another snapshot</a> <br> <a href="/gallery">Gallery</a>`);   
+                        res.send(`<h1>Thank you!</h1><p>Your photo was succesfully uploaded.</p><p>It will be deleted in 7 days.</p> <img src="${uploadedPhotoPath}" /> <p>You can access it via this QR Code:</p> <img src="/qr_codes/${fileName}"/> <br> <a href="/">Upload another snapshot</a> <br> <a href="/gallery">Gallery</a>`);   
                     }
                 });
             } else {
