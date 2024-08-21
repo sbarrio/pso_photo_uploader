@@ -31,13 +31,13 @@ if (!fs.existsSync(WORK_UPLOAD_DIR)) {
 // Periodic deletion task
 setInterval(() => {
     const now = Date.now();
-    console.log("Launching deletion task - " + now);
+    console.log(getFormattedDate(new Date()) + " - Launching deletion task - " + now);
 
     try {
         deleteOldFilesFrom(now, UPLOAD_DIR);
         deleteOldFilesFrom(now, QR_DIR);
     } catch(error) {
-        console.log("Deletion task Error: " + error);
+        console.log(getFormattedDate(new Date()) + " - Deletion task Error: " + error);
     }
 }, DELETION_TASK_INTERVAL_MS);
 
@@ -68,12 +68,14 @@ app.post('/submit', (req, res) => {
 
             // Sometimes the upload only sends 551 bytes for some reason, this way we prompt the user to try again
             if (contentLength < MIN_CONTENT_LENGTH_BYTES) {
+                console.log(getFormattedDate(new Date()) + " - Photo is too small: " + contentLength + " bytes");
                 res.send(`<h1>Sorry.</h1><p>Something went wrong, that photo file is too small.</p><a href="/">Try with a different one.</a>`);   
                 return;
             }
 
             // This way we about people sending aything bigger than GC screenshots
             if (contentLength > MAX_PHOTO_SIZE_BYTES) {
+                console.log(getFormattedDate(new Date()) + " - Photo is too big: " + contentLength + " bytes");
                 res.send(`<h1>Sorry.</h1><p>That photo is too big.</p><a href="/">Try with a different one.</a>`);   
                 return;   
             }
@@ -111,18 +113,25 @@ app.post('/submit', (req, res) => {
             });
 
             if (uploadedPhotoURL.length > 0) {
+                console.log(getFormattedDate(new Date()) + " - Uploaded snapshot: " + uploadedPhotoURL);
                 const fileName = `qrcode-${Date.now()}.png`;
                 const qrFilePath = path.join(QR_DIR, fileName);
                 QRCode.toFile(qrFilePath, uploadedPhotoURL, { errorCorrectionLevel: 'H' }, (err) => {
-                    if (err) res.send('Error generating QR Code');
-                    res.send(`<h1>Thank you!</h1><p>Your photo was succesfully uploaded.</p> <img src="${uploadedPhotoPath}" /> <p>You can access it via this QR Code:</p> <img src="/qr_codes/${fileName}"/> <br> <a href="/">Upload another snapshot</a>`);   
+                    if (err) {
+                        console.log(getFormattedDate(new Date()) + " - Error generating QR code for " + uploadedPhotoURL);
+                        res.send('Error generating QR Code');
+                    } else {
+                        console.log(getFormattedDate(new Date()) + " - Generated QR: " + fileName);
+                        res.send(`<h1>Thank you!</h1><p>Your photo was succesfully uploaded.</p> <img src="${uploadedPhotoPath}" /> <p>You can access it via this QR Code:</p> <img src="/qr_codes/${fileName}"/> <br> <a href="/">Upload another snapshot</a>`);   
+                    }
                 });
             } else {
+                console.log(getFormattedDate(new Date()) + " - Error - Uploaded photo is missing url");
                 res.send(`<h1>WAT</h1><p>Your photo was succesfully uploaded, but I can't find the path where it was stored....</p><p>Sorry.</p><a href="/">Try again, maybe?</a>`);   
             }
 
         } catch(error) {
-            console.log(error);
+            console.log(getFormattedDate(new Date()) + " - " + error);
             res.send(`<h1>Sorry.</h1><p>Something went wrong.</p><a href="/">Try again.</a>`);   
         }
     });
@@ -133,6 +142,17 @@ app.listen(API_PORT, () => {
 });
 
 // Helper functions
+
+function getFormattedDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); 
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
 
 function splitBuffer(buffer, boundary) {
     let parts = [];
