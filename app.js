@@ -52,6 +52,18 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+app.get('/pso_ep12', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'pso_ep12.html'));
+});
+
+app.get('/pso_ep3', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'pso_ep3.html'));
+});
+
+app.get('/gallery', (req, res) => {
+    res.send(`<p>Coming soon!</p><a href="/">Go back</a>`)
+});
+
 app.post('/submit', (req, res) => {
     let rawData = [];
     let uploadedPhotoURL = "";
@@ -60,6 +72,7 @@ app.post('/submit', (req, res) => {
         // Chunks must be treated as bytes, not strings
         rawData.push(chunk);
     });
+    console.log(req.headers);
 
     req.on('end', () => {
         try {
@@ -108,6 +121,8 @@ app.post('/submit', (req, res) => {
                         generateBitmap(fileData, filePath);
                         uploadedPhotoPath = "/uploads/" + filename; 
                         uploadedPhotoURL = "http://" + req.socket.localAddress.replace("::ffff:", "") + ":" + API_PORT + uploadedPhotoPath;
+                    } else {
+                        console.log("name: " + name + "part: " + part);
                     }
                 }
             });

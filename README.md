@@ -1,6 +1,6 @@
 ## PSO Photo Uploader
 
-This is a simple node js app that sets up and exposes a basic HTML4-compliant page that enables Gamecube players of Phantasy Star Online Episode 1&2 to upload their in-game snapshots from their memory cards to a modern web server. They can then retrieve them by either snapping the generated png file directly from the server (if they are running it on their own machine) or by accessing a public url in the shape of a generated QR Code in case this is running elsewhere.
+This is a simple node js app that sets up and exposes a basic HTML4-compliant page that enables Gamecube players of Phantasy Star Online Episode 1&2,3 to upload their in-game snapshots from their memory cards to a modern web server. They can then retrieve them by either snapping the generated png file directly from the server (if they are running it on their own machine) or by accessing a public url in the shape of a generated QR Code in case this is running elsewhere.
 
 ### Motivation
 
@@ -27,16 +27,17 @@ Special thanks for the image conversion code on PSO Proxy which is still miracul
 - Now, go back to the Title Screen and select "Webpage".
 - Tap on the Front Page mentioning that you need to buy a Hunter's License to play (🥲)
 - If everything is correctly set you should reach the Upload page (see screenshots below)
-- From there, just tap on **Send Image**. If you have a valid snapshot stored on Memory Card B it will be uploaded to the server and you'll be redirected to a page containing said image and a QR code. If you scan that code you can easily download the image on your smartphone as a convenient .png file.
+- Select the Episode (1&2 or 3) from where your snapshot is coming.
+- Tap on **Upload snapshot**. If you have a valid snapshot stored on Memory Card B it will be uploaded to the server and you'll be redirected to a page containing said image and a QR code. If you scan that code you can easily download the image on your smartphone as a convenient .png file.
 
 ### Example output
 
 <img src="doc/image0.jpeg">
+<img src="doc/image7.png">
 
 ### Caveats
 
-- Episode 3 support should be easy enough too, but I haven't had the time to test it yet.
-- It would be cool to make it work for the Dreamcast versions as well (sadly I don't have a DreamPi to test it with yet). 
+- It would be cool to make it work for the Dreamcast versions as well (sadly I don't have a DreamPi to test it with yet).
 - The page styling could definitely be prettier too.
 
 ### Screenshots
