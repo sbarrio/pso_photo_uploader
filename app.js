@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const QRCode = require('qrcode');
 const { generateBitmap } = require('./convert');
+const { timeStamp } = require('console');
 
 const app = express()
 const API_PORT = 3000;
@@ -12,8 +13,8 @@ const MAX_PHOTO_SIZE_BYTES = 164391; // ~165 KB
 const UPLOAD_DIR = path.join(__dirname, 'public/uploads');
 const QR_DIR = path.join(__dirname, 'public/qr_codes');
 const WORK_UPLOAD_DIR = path.join(__dirname, 'uploads');
-const MAX_FILE_FILETIME_MS = 30 * 60 * 1000 // 30 minutes in MS
-const DELETION_TASK_INTERVAL_MS = 5 * 60 * 1000; // Runs every 5 minutes
+const MAX_FILE_FILETIME_MS = 24 * 60 * 60 * 1000 // 24 hours in ms
+const DELETION_TASK_INTERVAL_MS = 60 * 60 * 1000; // 1 hour in ms
 
 // File management
 if (!fs.existsSync(UPLOAD_DIR)) {
@@ -61,7 +62,50 @@ app.get('/pso_ep3', (req, res) => {
 });
 
 app.get('/gallery', (req, res) => {
-    res.send(`<p>Coming soon!</p><a href="/">Go back</a>`)
+    const galleryPath = path.join(__dirname, 'public' ,'gallery.html');
+
+    fs.readdir(UPLOAD_DIR, (err, files) => {
+        if (err) {
+            console.log("err");
+            return res.send(`<h1>Sorry.</h1><p>Something went wrong.</p><a href="/">Go back.</a>`);   
+        }
+
+        const images = files.filter(file => file.endsWith(".png"))
+            .map(file => ({
+                name: file,
+                timestamp: parseInt(file.match(/_(\d+)\.png$/)[1], 10)
+            }))
+            .sort((a, b) => b.timestamp - a.timestamp)
+            .map(file => { return { src:'uploads/' + file.name, date: getFormattedDate(new Date(file.timestamp))}});
+
+        let rows = "";
+        for (let i = 0; i <images.length; i += 2) {
+            rows += "<tr>";
+            rows += `<td><td><img src="${images[i].src}"/><br><span>${images[i].date}</span></td>`;
+
+            if (images[i + 1]) {
+                rows += `<td><td><img src="${images[i + 1].src}"/><br><span>${images[i].date}</span></td>`;
+            }else {
+                rows += "<td></td>";
+            }
+            rows += `</tr><td><tr><td></td></tr><tr><td></td></tr>`;
+        }
+
+        fs.readFile(galleryPath, 'utf8', (err, html) => {
+            if (err) {
+                console.log(err);
+                return res.send(`<h1>Sorry.</h1><p>Something went wrong.</p><a href="/">Go back.</a>`);   
+            }
+
+            if (rows === "") {
+               rows = "<tr><td>There's nothing here yet.</td></tr>";
+            }
+
+            const filledGallery = html.replace('<!-- GALLERY GOES HERE -->', rows);
+            res.send(filledGallery);
+        });
+
+    });
 });
 
 app.post('/submit', (req, res) => {
@@ -137,7 +181,7 @@ app.post('/submit', (req, res) => {
                         res.send('Error generating QR Code');
                     } else {
                         console.log(getFormattedDate(new Date()) + " - Generated QR: " + fileName);
-                        res.send(`<h1>Thank you!</h1><p>Your photo was succesfully uploaded.</p> <img src="${uploadedPhotoPath}" /> <p>You can access it via this QR Code:</p> <img src="/qr_codes/${fileName}"/> <br> <a href="/">Upload another snapshot</a>`);   
+                        res.send(`<h1>Thank you!</h1><p>Your photo was succesfully uploaded.</p><p>It will be deleted after 24 hours.</p> <img src="${uploadedPhotoPath}" /> <p>You can access it via this QR Code:</p> <img src="/qr_codes/${fileName}"/> <br> <a href="/">Upload another snapshot</a> <br> <a href="/gallery">Gallery</a>`);   
                     }
                 });
             } else {
