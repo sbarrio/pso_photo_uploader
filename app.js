@@ -162,7 +162,7 @@ app.post('/submit', (req, res) => {
                             fs.writeFileSync(rawDataPath, rawData);
                         }
 
-                        const { photoPath, photoURL } = processImagePart(part);
+                        const { photoPath, photoURL } = processImagePart(part, req);
                         uploadedPhotoURL = photoURL;
                         uploadedPhotoPath = photoPath;
 
@@ -203,7 +203,7 @@ app.listen(API_PORT, () => {
 
 // Helper functions
 
-function processImagePart(part) {
+function processImagePart(part, req) {
     const timestamp = new Date().getTime();
     const filename = "PSO_SCREEN_" + timestamp + ".png";
 
