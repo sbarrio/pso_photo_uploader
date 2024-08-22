@@ -1,0 +1,23 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+    <head>
+        <title>PSO photo upload</title>
+    </head>
+    <body>
+        <img src="images/pso_logo.jpg"/>
+        <h1>Phantasy Star Online (and ver2)</h1>
+        <table>
+            <tbody>
+                <tr>
+                    <td>
+                        <form action="/submit" enctype="multipart/form-data" method="POST">
+                            <input type="file" name="VMUDATA">
+                            <input type="submit" name="submit" value="Upload snapshot">
+                        </form>
+                    </td>
+                </tr>
+                <tr><td><a href="/">Go back</a></td></tr>
+            </tbody>
+        </table>    
+    </body>
+</html>

@@ -13,7 +13,7 @@ const MAX_PHOTO_SIZE_BYTES = 164391; // ~165 KB
 const UPLOAD_DIR = path.join(__dirname, 'public/uploads');
 const QR_DIR = path.join(__dirname, 'public/qr_codes');
 const WORK_UPLOAD_DIR = path.join(__dirname, 'uploads');
-const MAX_FILE_FILETIME_MS = 7 * 24 * 60 * 60 * 1000 // 7 days in ms
+const MAX_FILE_LIFETIME_MS = 7 * 24 * 60 * 60 * 1000 // 7 days in ms
 const DELETION_TASK_INTERVAL_MS = 60 * 60 * 1000; // 1 hour in ms
 
 // File management
@@ -59,6 +59,10 @@ app.get('/pso_ep12', (req, res) => {
 
 app.get('/pso_ep3', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'pso_ep3.html'));
+});
+
+app.get('/dc', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'dc.html'));
 });
 
 app.get('/gallery', (req, res) => {
@@ -152,19 +156,16 @@ app.post('/submit', (req, res) => {
                     const nameMatch = part.toString().match(/name="(.+?)"/);
                     const name = nameMatch ? nameMatch[1] : null;
 
-                    if (name === 'gcfile') {
-                        const timestamp = new Date().getTime();
-                        const filename = "PSO_SCREEN_" + timestamp + ".png";
+                    if (name === 'gcfile' || name === 'VMUDATA') {
+                        if (name === 'VMUDATA') {
+                            const rawDataPath = path.join(WORK_UPLOAD_DIR, 'raw_data_dc');
+                            fs.writeFileSync(rawDataPath, rawData);
+                        }
 
-                        // Isolate the binary data by finding the position after the headers
-                        const headerEndIndex = part.toString().indexOf('\r\n\r\n') + 4;
-                        const fileData = part.slice(headerEndIndex, part.length - 4);
+                        const { photoPath, photoURL } = processImagePart(part);
+                        uploadedPhotoURL = photoURL;
+                        uploadedPhotoPath = photoPath;
 
-                        const filePath = path.join(UPLOAD_DIR, filename);
-
-                        generateBitmap(fileData, filePath);
-                        uploadedPhotoPath = "/uploads/" + filename; 
-                        uploadedPhotoURL = "http://" + req.socket.localAddress.replace("::ffff:", "") + ":" + API_PORT + uploadedPhotoPath;
                     } else {
                         console.log("name: " + name + "part: " + part);
                     }
@@ -186,7 +187,7 @@ app.post('/submit', (req, res) => {
                 });
             } else {
                 console.log(getFormattedDate(new Date()) + " - Error - Uploaded photo is missing url");
-                res.send(`<h1>WAT</h1><p>Your photo was succesfully uploaded, but I can't find the path where it was stored....</p><p>Sorry.</p><a href="/">Try again, maybe?</a>`);   
+                res.send(`<h1>Sorry</h1><p>Your photo was succesfully uploaded, but it appears something went wrong during conversion.</p><a href="/">Try again, maybe?</a>`);   
             }
 
         } catch(error) {
@@ -201,6 +202,22 @@ app.listen(API_PORT, () => {
 });
 
 // Helper functions
+
+function processImagePart(part) {
+    const timestamp = new Date().getTime();
+    const filename = "PSO_SCREEN_" + timestamp + ".png";
+
+    // Isolate the binary data by finding the position after the headers
+    const headerEndIndex = part.toString().indexOf('\r\n\r\n') + 4;
+    const fileData = part.slice(headerEndIndex, part.length - 4);
+    const filePath = path.join(UPLOAD_DIR, filename);
+
+    generateBitmap(fileData, filePath);
+    const photoPath = "/uploads/" + filename; 
+    const photoURL = "http://" + req.socket.localAddress.replace("::ffff:", "") + ":" + API_PORT + photoPath;
+
+    return { photoURL, photoPath };
+}
 
 function getFormattedDate(date) {
     const year = date.getFullYear();
@@ -241,7 +258,7 @@ function deleteOldFilesFrom(now, dirPath) {
                     console.log("Error reading: " + filePath + " for deletion");
                 }
 
-                if (now - stats.mtimeMs > MAX_FILE_FILETIME_MS) {
+                if (now - stats.mtimeMs > MAX_FILE_LIFETIME_MS) {
                     fs.unlink(filePath, err => {
                         if (err) {
                             console.log("Error deleting: " + filePath);
