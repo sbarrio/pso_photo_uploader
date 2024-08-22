@@ -85,10 +85,10 @@ app.get('/gallery', (req, res) => {
         let rows = "";
         for (let i = 0; i <images.length; i += 2) {
             rows += "<tr>";
-            rows += `<td><td><img src="${images[i].src}"/><br><span>${images[i].date}</span></td>`;
+            rows += `<td><td><img src="${images[i].src}"/><br><span style="margin-left: 60px;line-height: 24px;">${images[i].date}</span></td>`;
 
             if (images[i + 1]) {
-                rows += `<td><td><img src="${images[i + 1].src}"/><br><span>${images[i].date}</span></td>`;
+                rows += `<td><td><img src="${images[i + 1].src}"/><br><span style="margin-left: 60px;line-height: 24px;">${images[i].date}</span></td>`;
             }else {
                 rows += "<td></td>";
             }
