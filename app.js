@@ -156,16 +156,14 @@ app.post('/submit', (req, res) => {
                     const nameMatch = part.toString().match(/name="(.+?)"/);
                     const name = nameMatch ? nameMatch[1] : null;
 
-                    if (name === 'gcfile' || name === 'VMUDATA') {
-                        if (name === 'VMUDATA') {
-                            const rawDataPath = path.join(WORK_UPLOAD_DIR, 'raw_data_dc');
-                            fs.writeFileSync(rawDataPath, rawData);
-                        }
-
+                    if (name === 'gcfile') {
                         const { photoPath, photoURL } = processImagePart(part, req);
                         uploadedPhotoURL = photoURL;
                         uploadedPhotoPath = photoPath;
 
+                    } else if (name === 'vmfile') {
+                        const rawDataPath = path.join(WORK_UPLOAD_DIR, 'raw_data_dc');
+                        fs.writeFileSync(rawDataPath, rawData);
                     } else {
                         console.log("name: " + name + "part: " + part);
                     }
