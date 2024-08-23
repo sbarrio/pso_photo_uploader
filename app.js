@@ -164,6 +164,10 @@ app.post('/submit', (req, res) => {
                     } else if (name === 'vmfile') {
                         const rawDataPath = path.join(WORK_UPLOAD_DIR, 'raw_data_dc');
                         fs.writeFileSync(rawDataPath, rawData);
+
+                        const { photoPath, photoURL } = processImagePart(part, req);
+                        uploadedPhotoURL = photoURL;
+                        uploadedPhotoPath = photoPath;
                     } else {
                         console.log("name: " + name + "part: " + part);
                     }
