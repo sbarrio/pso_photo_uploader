@@ -88,15 +88,13 @@ app.get('/gallery', (req, res) => {
             .sort((a, b) => b.timestamp - a.timestamp)
             .map(file => { return { src:'uploads/' + file.name, date: getFormattedDate(new Date(file.timestamp))}});
 
-        console.log(images);
         let rows = "";
         for (let i = 0; i < images.length - 1; i += 2) {
-            console.log(i);
             rows += "<tr>";
             rows += `<td><td><img src="${images[i].src}"/><br><span style="margin-left: 60px;line-height: 24px;">${images[i].date}</span></td>`;
 
             if (images[i + 1]) {
-                rows += `<td><td><img src="${images[i + 1].src}"/><br><span style="margin-left: 60px;line-height: 24px;">${images[i + i].date}</span></td>`;
+                rows += `<td><td><img src="${images[i + 1].src}"/><br><span style="margin-left: 60px;line-height: 24px;">${images[i + 1].date}</span></td>`;
             }else {
                 rows += "<td></td>";
             }
