@@ -73,7 +73,7 @@ app.get('/gallery', (_req, res) => {
     fs.readdir(UPLOAD_DIR, (err, files) => {
         if (err) {
             console.log("err");
-            return res.send(renderMessage(`<h1>Sorry.</h1><p>Something went wrong.</p><a href="/">Go back.</a>`));   
+            return res.send(renderMessage(`<p>Something went wrong.</p>`));   
         }
 
         const images = files.filter(file => file.endsWith(".png")).map(file => {
@@ -100,12 +100,12 @@ app.get('/gallery', (_req, res) => {
         fs.readFile(galleryPath, 'utf8', (err, html) => {
             if (err) {
                 console.log(err);
-                res.send(renderMessage(`<h1>Sorry.</h1><p>Something went wrong.</p><a href="/">Go back.</a>`));
+                res.send(renderMessage(`<p>Something went wrong.</p>`));
                 return;
             }
 
             if (rows === "") {
-               rows = `<tr><td><font face="arial, helvetica, sans-serif" size="2" color="#ffffff">There's nothing here yet.<font></td></tr>`;
+               rows = `<tr><td><font face="arial, helvetica, sans-serif" size="2" color="#ffffff">There's nothing here yet.<font></td></tr><tr><td width="530" height="20">&nbsp;</td></tr>`;
             }
 
             const filledGallery = html.replace('<!-- GALLERY GOES HERE -->', rows);
@@ -190,12 +190,12 @@ app.post('/submit', (req, res) => {
                 });
             } else {
                 console.log(getFormattedDate(new Date()) + " - Error - Uploaded photo is missing url");
-                renderMessage(res, `<h1>Sorry</h1><p>Your photo was succesfully uploaded, but it appears something went wrong during conversion.</p><a href="/">Try again, maybe?</a>`);   
+                renderMessage(res, `<p>Your photo was succesfully uploaded, but it appears something went wrong during conversion.</p><a href="/">Try again, maybe?</a>`);   
             }
 
         } catch(error) {
             console.log(getFormattedDate(new Date()) + " - " + error);
-            renderMessage(res, `<h1>Sorry.</h1><p>Something went wrong.</p><a href="/">Try again.</a>`);        }
+            renderMessage(res, `<p>Something went wrong.</p><a href="/">Try again.</a>`);        }
     });
 });
 
@@ -342,7 +342,7 @@ function renderMessage(res, message) {
     fs.readFile(messagePath, 'utf8', (err, html) => {
         if (err) {
             console.log(err);
-            message = `<h1>Sorry.</h1><p>Something went wrong.</p><a href="/">Go back.</a>`;
+            message = `<p>Something went wrong.</p>`;
         }
 
         const filledMessage = html.replace('<!-- MESSAGE GOES HERE -->', message);
