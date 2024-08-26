@@ -4,7 +4,7 @@ This is a simple node js app that sets up and exposes a basic HTML4-compliant pa
 
 ### Motivation
 
-This is basically the same thing that good old http://pso.donut-dhs.org did back in the day. Since it appears to be offline (as of August 2024) I decided to create an open source app that replicates its functionality. I've also deployed it for the world to use at http://103.45.245.145:3000
+This is basically the same thing that good old http://pso.donut-dhs.org did back in the day. Since it appears to be offline (as of August 2024) I decided to create an open source app that replicates its functionality. I've also deployed it for the world to use [here](http://103.45.245.145:3000).
 
 ### Sources
 
@@ -37,12 +37,11 @@ Special thanks for the image conversion code on PSO Proxy which is still miracul
 
 ### Caveats
 
-- It would be cool to make it work for the Dreamcast versions as well (sadly I don't have a DreamPi to test it with yet).
-- The page styling could definitely be prettier too.
+- No Dreamcast support (Work in progress)
 
-### Screenshots
+### Webpage
 
-Sorry for the Y2K quality, but these were taken directly from a CRT. They are as authentic as they can be :D
+You can access it right [here](http://103.45.245.145)
 
 <img width=500 src="doc/web.png"/>
 
