@@ -13,6 +13,7 @@ const MAX_PHOTO_SIZE_BYTES = 164391; // ~165 KB
 const UPLOAD_DIR = path.join(__dirname, 'public/uploads');
 const QR_DIR = path.join(__dirname, 'public/qr_codes');
 const WORK_UPLOAD_DIR = path.join(__dirname, 'uploads');
+const enableCleanup = false;
 const MAX_FILE_LIFETIME_MS = 7 * 24 * 60 * 60 * 1000 // 7 days in ms
 const DELETION_TASK_INTERVAL_MS = 60 * 60 * 1000; // 1 hour in ms
 
@@ -31,8 +32,13 @@ if (!fs.existsSync(WORK_UPLOAD_DIR)) {
 
 // Periodic deletion task
 setInterval(() => {
+    if (!enableCleanup) {
+        console.log(getFormattedDate(new Date()) + " - Deletion task is disabled, skipping.");
+        return;
+    }
+
     const now = Date.now();
-    console.log(getFormattedDate(new Date()) + " - Launching deletion task - " + now);
+    console.log(getFormattedDate(new Date()) + " - Launching deletion task - Timestamp: " + now);
 
     try {
         deleteOldFilesFrom(now, UPLOAD_DIR);
@@ -88,7 +94,7 @@ app.get('/gallery', (req, res) => {
             rows += `<td><td><img src="${images[i].src}"/><br><span style="margin-left: 60px;line-height: 24px;">${images[i].date}</span></td>`;
 
             if (images[i + 1]) {
-                rows += `<td><td><img src="${images[i + 1].src}"/><br><span style="margin-left: 60px;line-height: 24px;">${images[i].date}</span></td>`;
+                rows += `<td><td><img src="${images[i + 1].src}"/><br><span style="margin-left: 60px;line-height: 24px;">${images[i + i].date}</span></td>`;
             }else {
                 rows += "<td></td>";
             }
@@ -184,7 +190,7 @@ app.post('/submit', (req, res) => {
                         res.send('Error generating QR Code');
                     } else {
                         console.log(getFormattedDate(new Date()) + " - Generated QR: " + fileName);
-                        res.send(`<h1>Thank you!</h1><p>Your photo was succesfully uploaded.</p><p>It will be deleted in 7 days.</p> <img src="${uploadedPhotoPath}" /> <p>You can access it via this QR Code:</p> <img src="/qr_codes/${fileName}"/> <br> <a href="/">Upload another snapshot</a> <br> <a href="/gallery">Gallery</a>`);   
+                        res.send(`<h1>Thank you!</h1><p>Your photo was succesfully uploaded.</p><img src="${uploadedPhotoPath}" /> <p>You can access it via this QR Code:</p> <img src="/qr_codes/${fileName}"/> <br> <a href="/">Upload another snapshot</a> <br> <a href="/gallery">Gallery</a>`);   
                     }
                 });
             } else {
