@@ -43,7 +43,7 @@ Special thanks for the image conversion code on PSO Proxy which is still miracul
 
 You can access it right [here](http://103.45.245.145)
 
-<img width=500 src="doc/web.png"/>
+<a href="http://103.45.245.145"><img width=500 src="doc/web.png"/></a>
 
 Testing hardware:
 
