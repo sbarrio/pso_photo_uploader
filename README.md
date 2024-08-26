@@ -44,10 +44,7 @@ Special thanks for the image conversion code on PSO Proxy which is still miracul
 
 Sorry for the Y2K quality, but these were taken directly from a CRT. They are as authentic as they can be :D
 
-<img width=500 src="doc/image1.jpeg">
-<img width=500 src="doc/image2.jpeg">
-<img width=500 src="doc/image4.jpeg">
-<img width=500 src="doc/image5.jpeg">
+<img width=500 src="doc/web.png"/>
 
 Testing hardware:
 
