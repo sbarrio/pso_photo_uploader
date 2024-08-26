@@ -2,8 +2,8 @@ const express = require('express')
 const path = require('path');
 const fs = require('fs');
 const QRCode = require('qrcode');
+const { v4: uuidv4 } = require('uuid');
 const { generateBitmap } = require('./convert');
-const { timeStamp } = require('console');
 
 const app = express()
 const API_PORT = 3000;
@@ -56,7 +56,7 @@ app.get('/redirector', (_req, res) => {
 });
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'newindex.html'));
 });
 
 app.get('/pso_ep12', (req, res) => {
@@ -80,25 +80,25 @@ app.get('/gallery', (req, res) => {
             return res.send(`<h1>Sorry.</h1><p>Something went wrong.</p><a href="/">Go back.</a>`);   
         }
 
-        const images = files.filter(file => file.endsWith(".png"))
-            .map(file => ({
-                name: file,
-                timestamp: parseInt(file.match(/_(\d+)\.png$/)[1], 10)
-            }))
-            .sort((a, b) => b.timestamp - a.timestamp)
-            .map(file => { return { src:'uploads/' + file.name, date: getFormattedDate(new Date(file.timestamp))}});
+        const images = files.filter(file => file.endsWith(".png")).map(file => {
+            const parts = file.split('_');
+            const platform = parts[1];
+            const uuid = parts[2];
+            const timestamp = parseInt(parts[3].replace('.png', ''));
+
+            return {
+                src: 'uploads/' + file,
+                qr_src: 'qr_codes/qrcode-' + uuid + ".png",
+                platform,
+                uuid,
+                timestamp,
+                date: getFormattedDate(new Date(timestamp)),
+            };
+        }).sort((a, b) => b.timestamp - a.timestamp);
 
         let rows = "";
-        for (let i = 0; i < images.length; i += 2) {
-            rows += "<tr>";
-            rows += `<td><td><img src="${images[i].src}"/><br><span style="margin-left: 60px;line-height: 24px;">${images[i].date}</span></td>`;
-
-            if (images[i + 1]) {
-                rows += `<td><td><img src="${images[i + 1].src}"/><br><span style="margin-left: 60px;line-height: 24px;">${images[i + 1].date}</span></td>`;
-            }else {
-                rows += "<td></td>";
-            }
-            rows += `</tr><td><tr><td></td></tr><tr><td></td></tr>`;
+        for (let i = 0; i < images.length; i++ ) {
+            rows += renderGalleryEntry(images[i]);
         }
 
         fs.readFile(galleryPath, 'utf8', (err, html) => {
@@ -121,6 +121,7 @@ app.get('/gallery', (req, res) => {
 app.post('/submit', (req, res) => {
     let rawData = [];
     let uploadedPhotoURL = "";
+    let uuid = "";
 
     req.on('data', (chunk) => {
         // Chunks must be treated as bytes, not strings
@@ -159,21 +160,18 @@ app.post('/submit', (req, res) => {
 
             parts.forEach(part => {
                 if (part.includes('Content-Disposition: form-data')) {
-                    const nameMatch = part.toString().match(/name="(.+?)"/);
+                    const stringPart = part.toString();
+                    const nameMatch = stringPart.match(/name="(.+?)"/);
                     const name = nameMatch ? nameMatch[1] : null;
+                    const acceptFilename = stringPart.split('filename=')[1].split('&')[0]; 
+                    const platform = getPlatformFromFilename(acceptFilename);
+                    const baseURL = "http://" + req.socket.localAddress.replace("::ffff:", "") + ":" + API_PORT;
 
-                    if (name === 'gcfile') {
-                        const { photoPath, photoURL } = processImagePart(part, req);
+                    if (name === 'gcfile' || name === 'vmfile' ) {
+                        const { photoPath, photoURL, photoUUID } = processImagePart(part, baseURL, platform);
                         uploadedPhotoURL = photoURL;
                         uploadedPhotoPath = photoPath;
-
-                    } else if (name === 'vmfile') {
-                        const rawDataPath = path.join(WORK_UPLOAD_DIR, 'raw_data_dc');
-                        fs.writeFileSync(rawDataPath, rawData);
-
-                        const { photoPath, photoURL } = processImagePart(part, req);
-                        uploadedPhotoURL = photoURL;
-                        uploadedPhotoPath = photoPath;
+                        uuid = photoUUID;
                     } else {
                         console.log("name: " + name + "part: " + part);
                     }
@@ -182,7 +180,7 @@ app.post('/submit', (req, res) => {
 
             if (uploadedPhotoURL.length > 0) {
                 console.log(getFormattedDate(new Date()) + " - Uploaded snapshot: " + uploadedPhotoURL);
-                const fileName = `qrcode-${Date.now()}.png`;
+                const fileName = `qrcode-${uuid}.png`;
                 const qrFilePath = path.join(QR_DIR, fileName);
                 QRCode.toFile(qrFilePath, uploadedPhotoURL, { errorCorrectionLevel: 'H' }, (err) => {
                     if (err) {
@@ -211,20 +209,29 @@ app.listen(API_PORT, () => {
 
 // Helper functions
 
-function processImagePart(part, req) {
+function processImagePart(part, baseURL, platform) {
     const timestamp = new Date().getTime();
-    const filename = "PSO_SCREEN_" + timestamp + ".png";
+    const uuid = uuidv4();
+    const filename = "PSO_" + platform + "_" + uuid +"_" + timestamp + ".png";
 
     // Isolate the binary data by finding the position after the headers
     const headerEndIndex = part.toString().indexOf('\r\n\r\n') + 4;
     const fileData = part.slice(headerEndIndex, part.length - 4);
     const filePath = path.join(UPLOAD_DIR, filename);
 
-    generateBitmap(fileData, filePath);
-    const photoPath = "/uploads/" + filename; 
-    const photoURL = "http://" + req.socket.localAddress.replace("::ffff:", "") + ":" + API_PORT + photoPath;
+    if (platform === "DC") {
+        console.log("Received DC image part: ");
+        console.log(part);
+        console.log("------------------------");
+    } else {
+        generateBitmap(fileData, filePath);
+    }
 
-    return { photoURL, photoPath };
+    const photoPath = "/uploads/" + filename; 
+    const photoURL = baseURL + photoPath;
+    const photoUUID = uuid;
+
+    return { photoURL, photoPath, photoUUID };
 }
 
 function getFormattedDate(date) {
@@ -236,6 +243,32 @@ function getFormattedDate(date) {
     const seconds = String(date.getSeconds()).padStart(2, '0');
     
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
+function getPlatformFromFilename(filename) {
+    switch(filename) {
+        case "PSO_SCREEN":
+            return "GC-EP12";
+        case "PSO3_SCREEN":
+            return "GC-EP3";
+        case "PSODC_SCREEN":
+            return "DC";
+        default:
+            return "";
+    }
+}
+
+function getFormattedPlatform(platform) {
+    switch(platform) {
+        case "GC-EP12":
+            return "Gamecube Ep 1,2";
+        case "GC-EP3":
+            return "Gamecube Ep 3";
+        case "DC":
+            return "Dreamcast (ver 1,2)";
+        default:
+            return "Unknown platform";
+    }
 }
 
 function splitBuffer(buffer, boundary) {
@@ -277,4 +310,32 @@ function deleteOldFilesFrom(now, dirPath) {
             });
         });
     });
+}
+
+function renderGalleryEntry(image) {
+    return `<tr>
+                <td>
+                    <img src="${image.src}">
+                    <font face="arial, helvetica, sans-serif" size="4" color="#ffffff">${image.date}</font>
+                </td>
+                <td>
+                    <table width="200" border="0" cellspacing="5" cellpadding="0" align="center">
+                        <tbody>
+                            <tr><td><img width=180 src="${image.qr_src}"></td></tr>
+                            <tr>
+                                <td>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <font face="arial, helvetica, sans-serif" size="2" color="#ffffff">${getFormattedPlatform(image.platform)}</font>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                </td>
+            </tr>
+            <tr><td width="530" height="20">&nbsp;</td></tr>`
+
 }
