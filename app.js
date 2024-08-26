@@ -80,7 +80,6 @@ app.get('/gallery', (req, res) => {
             return res.send(`<h1>Sorry.</h1><p>Something went wrong.</p><a href="/">Go back.</a>`);   
         }
 
-        console.log(images);
         const images = files.filter(file => file.endsWith(".png"))
             .map(file => ({
                 name: file,
@@ -89,6 +88,7 @@ app.get('/gallery', (req, res) => {
             .sort((a, b) => b.timestamp - a.timestamp)
             .map(file => { return { src:'uploads/' + file.name, date: getFormattedDate(new Date(file.timestamp))}});
 
+        console.log(images);
         let rows = "";
         for (let i = 0; i < images.length - 1; i += 2) {
             rows += "<tr>";
