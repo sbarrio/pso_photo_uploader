@@ -105,7 +105,7 @@ app.get('/gallery', (_req, res) => {
             }
 
             if (rows === "") {
-               rows = "<tr><td>There's nothing here yet.</td></tr>";
+               rows = `<tr><td><font face="arial, helvetica, sans-serif" size="2" color="#ffffff">There's nothing here yet.<font></td></tr>`;
             }
 
             const filledGallery = html.replace('<!-- GALLERY GOES HERE -->', rows);
