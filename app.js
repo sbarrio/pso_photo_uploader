@@ -91,6 +91,7 @@ app.get('/gallery', (req, res) => {
         console.log(images);
         let rows = "";
         for (let i = 0; i < images.length - 1; i += 2) {
+            console.log(i);
             rows += "<tr>";
             rows += `<td><td><img src="${images[i].src}"/><br><span style="margin-left: 60px;line-height: 24px;">${images[i].date}</span></td>`;
 
