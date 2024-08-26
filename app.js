@@ -55,29 +55,25 @@ app.get('/redirector', (_req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'newindex.html'));
-});
-
-app.get('/pso_ep12', (req, res) => {
+app.get('/pso_ep12', (_req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'pso_ep12.html'));
 });
 
-app.get('/pso_ep3', (req, res) => {
+app.get('/pso_ep3', (_req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'pso_ep3.html'));
 });
 
-app.get('/dc', (req, res) => {
+app.get('/dc', (_req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'dc.html'));
 });
 
-app.get('/gallery', (req, res) => {
+app.get('/gallery', (_req, res) => {
     const galleryPath = path.join(__dirname, 'public' ,'gallery.html');
 
     fs.readdir(UPLOAD_DIR, (err, files) => {
         if (err) {
             console.log("err");
-            return res.send(`<h1>Sorry.</h1><p>Something went wrong.</p><a href="/">Go back.</a>`);   
+            return res.send(renderMessage(`<h1>Sorry.</h1><p>Something went wrong.</p><a href="/">Go back.</a>`));   
         }
 
         const images = files.filter(file => file.endsWith(".png")).map(file => {
@@ -104,7 +100,8 @@ app.get('/gallery', (req, res) => {
         fs.readFile(galleryPath, 'utf8', (err, html) => {
             if (err) {
                 console.log(err);
-                return res.send(`<h1>Sorry.</h1><p>Something went wrong.</p><a href="/">Go back.</a>`);   
+                res.send(renderMessage(`<h1>Sorry.</h1><p>Something went wrong.</p><a href="/">Go back.</a>`));
+                return;
             }
 
             if (rows === "") {
@@ -137,14 +134,14 @@ app.post('/submit', (req, res) => {
             // Sometimes the upload only sends 551 bytes for some reason, this way we prompt the user to try again
             if (contentLength < MIN_CONTENT_LENGTH_BYTES) {
                 console.log(getFormattedDate(new Date()) + " - Photo is too small: " + contentLength + " bytes");
-                res.send(`<h1>Sorry.</h1><p>Something went wrong, that photo file is too small.</p><a href="/">Try with a different one.</a>`);   
+                renderMessage(res, `<p>Something went wrong, that photo file is too small.</p><a href="/">Try with a different one.</a><br>`);
                 return;
             }
 
             // This way we about people sending aything bigger than GC screenshots
             if (contentLength > MAX_PHOTO_SIZE_BYTES) {
                 console.log(getFormattedDate(new Date()) + " - Photo is too big: " + contentLength + " bytes");
-                res.send(`<h1>Sorry.</h1><p>That photo is too big.</p><a href="/">Try with a different one.</a>`);   
+                renderMessage(res, `<p>That photo is too big.</p><a href="/">Try with a different one.</a><br>`);   
                 return;   
             }
 
@@ -185,21 +182,20 @@ app.post('/submit', (req, res) => {
                 QRCode.toFile(qrFilePath, uploadedPhotoURL, { errorCorrectionLevel: 'H' }, (err) => {
                     if (err) {
                         console.log(getFormattedDate(new Date()) + " - Error generating QR code for " + uploadedPhotoURL);
-                        res.send('Error generating QR Code');
+                        renderMessage(res,'Error generating QR Code');
                     } else {
                         console.log(getFormattedDate(new Date()) + " - Generated QR: " + fileName);
-                        res.send(`<h1>Thank you!</h1><p>Your photo was succesfully uploaded.</p><img src="${uploadedPhotoPath}" /> <p>You can access it via this QR Code:</p> <img src="/qr_codes/${fileName}"/> <br> <a href="/">Upload another snapshot</a> <br> <a href="/gallery">Gallery</a>`);   
+                        renderMessage(res, `<h1>Thank you!</h1><p>Your photo was succesfully uploaded.</p><img src="${uploadedPhotoPath}" /> <p>You can access it via this QR Code:</p> <img src="/qr_codes/${fileName}"/> <br><br> <a href="/">Upload another snapshot</a> <br><br> <a href="/gallery">Go to gallery</a><br>`);   
                     }
                 });
             } else {
                 console.log(getFormattedDate(new Date()) + " - Error - Uploaded photo is missing url");
-                res.send(`<h1>Sorry</h1><p>Your photo was succesfully uploaded, but it appears something went wrong during conversion.</p><a href="/">Try again, maybe?</a>`);   
+                renderMessage(res, `<h1>Sorry</h1><p>Your photo was succesfully uploaded, but it appears something went wrong during conversion.</p><a href="/">Try again, maybe?</a>`);   
             }
 
         } catch(error) {
             console.log(getFormattedDate(new Date()) + " - " + error);
-            res.send(`<h1>Sorry.</h1><p>Something went wrong.</p><a href="/">Try again.</a>`);   
-        }
+            renderMessage(res, `<h1>Sorry.</h1><p>Something went wrong.</p><a href="/">Try again.</a>`);        }
     });
 });
 
@@ -338,4 +334,18 @@ function renderGalleryEntry(image) {
             </tr>
             <tr><td width="530" height="20">&nbsp;</td></tr>`
 
+}
+
+function renderMessage(res, message) {
+    const messagePath = path.join(__dirname, 'public' ,'message.html');
+
+    fs.readFile(messagePath, 'utf8', (err, html) => {
+        if (err) {
+            console.log(err);
+            message = `<h1>Sorry.</h1><p>Something went wrong.</p><a href="/">Go back.</a>`;
+        }
+
+        const filledMessage = html.replace('<!-- MESSAGE GOES HERE -->', message);
+        res.send(filledMessage);
+    });
 }
