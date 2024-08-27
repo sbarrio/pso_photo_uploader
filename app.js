@@ -4,6 +4,7 @@ const fs = require('fs');
 const QRCode = require('qrcode');
 const { v4: uuidv4 } = require('uuid');
 const { generateBitmap } = require('./convert');
+const { generateBitmapDC } = require('./convert_dc');
 
 const app = express()
 const API_PORT = 3000;
@@ -217,8 +218,10 @@ function processImagePart(part, baseURL, platform) {
 
     if (platform === "DC") {
         console.log("Received DC image part: ");
-        console.log(part);
+        console.log("Length: " + part.length)
+        console.log(part.toString());
         console.log("------------------------");
+        generateBitmapDC(fileData, filePath);
     } else {
         generateBitmap(fileData, filePath);
     }
