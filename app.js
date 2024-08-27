@@ -3,8 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const QRCode = require('qrcode');
 const { v4: uuidv4 } = require('uuid');
-const { generateBitmap } = require('./convert');
-const { generateBitmapDC } = require('./convert_dc');
+const { generateBitmap, generateBitmapDC } = require('./convert');
 
 const app = express()
 const API_PORT = 3000;
@@ -166,6 +165,12 @@ app.post('/submit', (req, res) => {
                         uploadedPhotoURL = photoURL;
                         uploadedPhotoPath = photoPath;
                         uuid = photoUUID;
+
+                        // Debug
+                        if (platform === 'DC') {
+                            const rawDataPath = path.join(WORK_UPLOAD_DIR, 'raw_data_dc_' + uuid);
+                            fs.writeFileSync(rawDataPath, rawData);
+                        }
                     } else {
                         console.log("name: " + name + "part: " + part);
                     }
@@ -207,21 +212,17 @@ function processImagePart(part, baseURL, platform) {
     const uuid = uuidv4();
     const filename = "PSO_" + platform + "_" + uuid +"_" + timestamp + ".png";
     const filePath = path.join(UPLOAD_DIR, filename);
+    const stringPart = part.toString();
 
     if (platform === "DC") {
-        const HeaderLength = 165;
-        const trailingLength = 158;
-        const fileData = part.slice(HeaderLength, part.length - trailingLength);
+        const headerEndIndex = getPosition(stringPart, "\n\n", 1);
+        const dataEndIndex = getPosition(stringPart, "\n\n", 2) - 1;
+        const fileData = part.slice(headerEndIndex, dataEndIndex);
 
-        console.log("Received DC image data: ");
-        console.log("Length: " + fileData.length);
-        console.log(fileData.toString().slice(0, 50));
-        console.log(fileData.toString().slice(fileData.length - 50, fileData.length));
-        console.log("------------------------");
         generateBitmapDC(fileData, filePath);
     } else {
         // Isolate the binary data by finding the position after the headers
-        const headerEndIndex = part.toString().indexOf('\r\n\r\n') + 4;
+        const headerEndIndex = stringPart.indexOf('\r\n\r\n') + 4;
         const fileData = part.slice(headerEndIndex, part.length - 4);
 
         generateBitmap(fileData, filePath);
@@ -352,4 +353,9 @@ function renderMessage(res, message) {
         const filledMessage = html.replace('<!-- MESSAGE GOES HERE -->', message);
         res.send(filledMessage);
     });
+}
+
+
+function getPosition(string, subString, index) {
+    return string.split(subString, index).join(subString).length;
 }
