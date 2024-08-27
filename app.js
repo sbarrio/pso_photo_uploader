@@ -247,7 +247,7 @@ function getPlatformFromFilename(filename) {
             return "GC-EP12";
         case "PSO3_SCREEN":
             return "GC-EP3";
-        case "PSODC_SCREEN":
+        case "PSO______IMG":
             return "DC";
         default:
             return "";
