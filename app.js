@@ -206,19 +206,24 @@ function processImagePart(part, baseURL, platform) {
     const timestamp = new Date().getTime();
     const uuid = uuidv4();
     const filename = "PSO_" + platform + "_" + uuid +"_" + timestamp + ".png";
-
-    // Isolate the binary data by finding the position after the headers
-    const headerEndIndex = part.toString().indexOf('\r\n\r\n') + 4;
-    const fileData = part.slice(headerEndIndex, part.length - 4);
     const filePath = path.join(UPLOAD_DIR, filename);
 
     if (platform === "DC") {
-        console.log("Received DC image part: ");
-        console.log("Length: " + part.length);
-        console.log(fileData.toString());
+        const HeaderLength = 165;
+        const trailingLength = 158;
+        const fileData = part.slice(HeaderLength, part.length - trailingLength);
+
+        console.log("Received DC image data: ");
+        console.log("Length: " + fileData.length);
+        console.log(fileData.toString().slice(0, 50));
+        console.log(fileData.toString().slice(fileData.length - 50, fileData.length));
         console.log("------------------------");
         generateBitmapDC(fileData, filePath);
     } else {
+        // Isolate the binary data by finding the position after the headers
+        const headerEndIndex = part.toString().indexOf('\r\n\r\n') + 4;
+        const fileData = part.slice(headerEndIndex, part.length - 4);
+
         generateBitmap(fileData, filePath);
     }
 

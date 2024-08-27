@@ -57,16 +57,6 @@ function decodeByte(byte) {
     return pTable[byte & 0x7F] & 0x7F;
 }
 
-// Endian swapping function
-function endianSwap(buffer) {
-    for (let i = 0; i < buffer.length; i += 2) {
-        const temp = buffer[i];
-        buffer[i] = buffer[i + 1];
-        buffer[i + 1] = temp;
-    }
-    return buffer;
-}
-
 const getCol16 = (x, y, bitmap16) => {
     if (x < 0 || x > 255 || y < 0 || y > 191) return -1;
     return bitmap16[x + 256 * y];
@@ -115,8 +105,6 @@ function generate24BitValue(x, y, sharp, bitmap16) {
 
 function generateBitmap(fileData, outputFilePath) {
     const decodedData = decode(fileData);
-    // Endian swap is initially not needed, at least running on OS X, might need to reintroduce it depending on where this is deployed
-    // const processedData = endianSwap(decodedData); 
     const OFFSET = 8272;
     const GC_FILE_SIZE = decodedData.length;
     const width = 256;

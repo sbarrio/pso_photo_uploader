@@ -65,5 +65,5 @@ function generateBitmapDC(fileData, outputFilePath) {
 }
 
 module.exports = {
-    generateBitmapDC,
+    generateBitmapDC
 }
