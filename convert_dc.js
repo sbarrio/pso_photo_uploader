@@ -1,38 +1,30 @@
 const fs = require('fs');
+const path = require('path');
 const { PNG } = require('pngjs');
 
 function generateBitmapDC(fileData, outputFilePath) {
+    // Image data is bmp 2 bytes per pixel 2x8 16 bit color in RGB565
     const width = 256;
     const height = 192;
     const bytesPerColor = 2;
+    const vmsHeaderLength = 645;
     const targetLen = width * height * bytesPerColor;
-    console.log(targetLen);
-    const png = new PNG({ width, height });
 
     let buffer = Buffer.from(fileData);
-    const bufferLen = buffer.length;
-    const imageLen = 99840;
-    const extraBytes = bufferLen - imageLen;
-    console.log(bufferLen, imageLen, extraBytes);
 
-    // Trim extra bytes from beginning
-    // buffer = buffer.slice(0, bufferLen - extraBytes - 1);
+    // Trim header
+    // const header = buffer.slice(0, vmsHeaderLength);
+    // console.log("Header " + header);
+    buffer = buffer.slice(vmsHeaderLength, buffer.length);
 
-    // Trim extra bytes from end
-    // buffer = buffer.slice(extraBytes - 1, buffer);
-
-    // trim extra bytes from the end due to color format
-    // buffer = buffer.slice(0, targetLen)
-
-    // console.log("Working buffer size " + targetLen);
+    // Extract metadata at the end
+    // const metadata = buffer.slice(targetLen, buffer.length);
+    // console.log("Metadata " + metadata);
 
     const bmp = Array.from({ length: width }, () => Array(height));
 
     let x = 0;
     let y = 0;
-    // Image data is bmp 2 bytes per pixel 2x8 16 bit color in RGB565?
-    console.log(buffer.length)
-
     for (let i = 0; i < targetLen; i += 2) {
         let colorBits = buffer.slice(i, i + 2);
         let color = (colorBits[0] << 8) | colorBits[1];
@@ -42,25 +34,20 @@ function generateBitmapDC(fileData, outputFilePath) {
         let b = color & 0x1F;         // Extract the last 5 bits for blue
         
         // Scale them to 8-bit values
-        r = (r * 255) / 31;
-        g = (g * 255) / 63;
-        b = (b * 255) / 31;
+        r = (r << 3) | (r >> 2); 
+        g = (g << 2) | (g >> 4); 
+        b = (b << 3) | (b >> 2);
 
-        //console.log("Setting pixel " + x + ", " + y + " to: " + r + " - " + g + " - " + b)
         bmp[x][y] = { r, g, b };
 
         x++;
         if (x >= width) {
-            //console.log("next row", x, y);
             x = 0;
             y++;
         }
-
-
     }
 
-    console.log("Final x y", x, y);
-    console.log(bmp[255][191])
+    const png = new PNG({ width, height });
 
     // Fill the PNG data with the BMP image data
     for (let y = 0; y < height; y++) {
@@ -74,7 +61,6 @@ function generateBitmapDC(fileData, outputFilePath) {
         }
     }
 
-    // Write the PNG file
     png.pack().pipe(fs.createWriteStream(outputFilePath));
 }
 

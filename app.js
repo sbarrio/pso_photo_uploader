@@ -148,10 +148,6 @@ app.post('/submit', (req, res) => {
 
             rawData = Buffer.concat(rawData);
 
-            // DEBUG
-            //const rawDataPath = path.join(WORK_UPLOAD_DIR, 'raw_data');
-            //fs.writeFileSync(rawDataPath, rawData);
-
             const boundary = '--' + req.headers['content-type'].split('; ')[1].replace('boundary=', '');
             const boundaryBuffer = Buffer.from(boundary);
             const parts = splitBuffer(rawData, boundaryBuffer).filter(part => part.length > 0);
@@ -218,8 +214,8 @@ function processImagePart(part, baseURL, platform) {
 
     if (platform === "DC") {
         console.log("Received DC image part: ");
-        console.log("Length: " + part.length)
-        console.log(part.toString());
+        console.log("Length: " + part.length);
+        console.log(fileData.toString());
         console.log("------------------------");
         generateBitmapDC(fileData, filePath);
     } else {
