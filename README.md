@@ -15,7 +15,7 @@ Special thanks for the image conversion code on PSO Proxy which is still miracul
 
 ### Usage
 
-- Clone the repo on your computer, run **npm install** and **node app.js** to launch the app
+- Clone the repo, then run **npm install** and **node app.js** to launch the app
 - The default PORT is 3000 but you can change it to whatever you want directly on app.js
 - Launch PSO on your Gamecube, make sure you are able to reach the internet via Modem or BBA.
 - Go to Options, Network Configuration and create a new connection profile (no need to overwrite your normal connection settings)
@@ -37,7 +37,7 @@ Special thanks for the image conversion code on PSO Proxy which is still miracul
 
 ### Caveats
 
-- No Dreamcast support (Work in progress)
+- Partial Dreamcast support (Work in progress)
 
 ### Webpage
 
