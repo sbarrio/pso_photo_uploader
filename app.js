@@ -215,9 +215,9 @@ function processImagePart(part, baseURL, platform) {
     const stringPart = part.toString();
 
     if (platform === "DC") {
-        const headerEndIndex = getPosition(stringPart, "\n\n", 1);
-        const dataEndIndex = getPosition(stringPart, "\n\n", 2) - 1;
-        const fileData = part.slice(headerEndIndex, dataEndIndex);
+        // Body layout: <Content-Disposition header>\n\n<metadata line>\n\n<base64 image data>
+        const dataStartIndex = getPosition(stringPart, "\n\n", 2) + 2;
+        const fileData = part.slice(dataStartIndex);
 
         generateBitmapDC(fileData, filePath);
     } else {
