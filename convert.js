@@ -5,15 +5,18 @@
 const fs = require('fs');
 const { PNG } = require('pngjs');
 
-const pDecoderSet = "TAZOLYNdnE9mP6ci3SzeqIyXBhDgfQp7l5batM4rFKJj8CusxR1+k2V0wUGovWH/";
-const pTable = Buffer.alloc(128, 0);
+const pDecoderSetGC = "TAZOLYNdnE9mP6ci3SzeqIyXBhDgfQp7l5batM4rFKJj8CusxR1+k2V0wUGovWH/";
+const pDecoderSetDC = "AZOLYNdnETmP6ci3Sze9IyXBhDgfQq7l5batM4rpKJj8CusxRF+k2V0wUGo1vWH/";
+const pTableGC = Buffer.alloc(128, 0);
+const pTableDC = Buffer.alloc(128, 0);
 const pRedLookup = Buffer.alloc(32);
 const pGreenLookup = Buffer.alloc(64);
 const pBlueLookup = Buffer.alloc(32);
 
-// Initialize the decoder mapping table
+// Initialize the decoder mapping tables
 for (let i = 64; i > 0; i--) {
-    pTable[pDecoderSet.charCodeAt(64 - i) & 0x7F] = 64 - i;
+    pTableGC[pDecoderSetGC.charCodeAt(64 - i) & 0x7F] = 64 - i;
+    pTableDC[pDecoderSetDC.charCodeAt(64 - i) & 0x7F] = 64 - i;
 }
 
 // Initialize the RGB lookup tables
@@ -29,12 +32,12 @@ for (let i = 0; i < 64; i++) {
     pGreenLookup[i] = Math.round(val * 255);
 }
 
-function decode(input) {
+function decode(input, table = pTableGC) {
     const output = Buffer.alloc((input.length / 4) * 3);
     let outIndex = 0;
 
     for (let i = 0; i < input.length; i += 4) {
-        const decoded = decodeBytes(input.slice(i, i + 4));
+        const decoded = decodeBytes(input.slice(i, i + 4), table);
         output[outIndex++] = decoded[0];
         output[outIndex++] = decoded[1];
         output[outIndex++] = decoded[2];
@@ -43,18 +46,22 @@ function decode(input) {
     return output;
 }
 
-function decodeBytes(input) {
+function decodeDC(input) {
+    return decode(input, pTableDC);
+}
+
+function decodeBytes(input, table = pTableGC) {
     const out = Buffer.alloc(3);
 
-    out[0] = (decodeByte(input[0]) << 2) | (decodeByte(input[1]) >> 4);
-    out[1] = (decodeByte(input[1]) << 4) | (decodeByte(input[2]) >> 2);
-    out[2] = (decodeByte(input[2]) << 6) | decodeByte(input[3]);
+    out[0] = (decodeByte(input[0], table) << 2) | (decodeByte(input[1], table) >> 4);
+    out[1] = (decodeByte(input[1], table) << 4) | (decodeByte(input[2], table) >> 2);
+    out[2] = (decodeByte(input[2], table) << 6) | decodeByte(input[3], table);
 
     return out;
 }
 
-function decodeByte(byte) {
-    return pTable[byte & 0x7F] & 0x7F;
+function decodeByte(byte, table = pTableGC) {
+    return table[byte & 0x7F] & 0x7F;
 }
 
 const getCol16 = (x, y, bitmap16) => {
@@ -220,16 +227,16 @@ function generateBitmap(fileData, outputFilePath) {
     png.pack().pipe(fs.createWriteStream(outputFilePath));
 }
 
-function generateBitmapDC(fileData, outputFilePath, decodeImage = true) {
-    const trimmedData = decodeImage ? removeLineBreaks(fileData) : fileData;
-    const decodedData = decodeImage ? decode(trimmedData) : trimmedData;
+function generateBitmapDC(fileData, outputFilePath, removeBreaks = true, decodeImage = true) {
+    const trimmedData = removeBreaks ? removeLineBreaksFromBuffer(fileData) : fileData;
+    const decodedData = decodeImage ? decodeDC(trimmedData) : trimmedData;
     fs.writeFileSync('raw_dc_inline', decodedData);
  
     // Image data is bmp 2 bytes per pixel 2x8 16 bit color in RGB565
     const width = 256;
     const height = 192;
     const bytesPerColor = 2;
-    const vmsHeaderLength = 643;
+    const vmsHeaderLength = 645;
     const targetLen = width * height * bytesPerColor;
 
     let buffer = Buffer.from(decodedData);
@@ -250,14 +257,11 @@ function generateBitmapDC(fileData, outputFilePath, decodeImage = true) {
     for (let i = 0; i < targetLen; i += 2) {
         let colorBits = buffer.slice(i, i + 2);
         let color = (colorBits[0] << 8) | colorBits[1];
-
-        let r = (color >> 11) & 0x1F; // Extract the top 5 bits for red
-        let g = (color >> 5) & 0x3F;  // Extract the next 6 bits for green
-        let b = color & 0x1F;         // Extract the last 5 bits for blue
-        
-        // Scale them to 8-bit values
-        r = (r << 3) | (r >> 2); 
-        g = (g << 2) | (g >> 4); 
+        let r = (color >> 11) & 0x1F;
+        let g = (color >> 5) & 0x3F;
+        let b = color & 0x1F;
+        r = (r << 3) | (r >> 2);
+        g = (g << 2) | (g >> 4);
         b = (b << 3) | (b >> 2);
 
         bmp[x][y] = { r, g, b };
@@ -267,10 +271,10 @@ function generateBitmapDC(fileData, outputFilePath, decodeImage = true) {
             x = 0;
             y++;
         }
-    }
+    }  
 
     const png = new PNG({ width, height });
-
+    
     // Fill the PNG data with the BMP image data
     for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
@@ -286,15 +290,9 @@ function generateBitmapDC(fileData, outputFilePath, decodeImage = true) {
     png.pack().pipe(fs.createWriteStream(outputFilePath));
 }
 
-function removeLineBreaks(data) {
-    let trimmedData = [];
-    for (let i = 0; i < data.length; i++) {
-        if (data[i] !== 10 && data[i] !== 13) {
-            trimmedData.push(data[i]);
-        }
-    }
-
-    return trimmedData;
+function removeLineBreaksFromBuffer(buffer) {
+    const stringWithoutLineBreaks = buffer.toString('ascii').replace(/(\r\n|\n|\r)/gm, '');
+    return Buffer.from(stringWithoutLineBreaks, 'ascii');
 }
 
 module.exports = {
