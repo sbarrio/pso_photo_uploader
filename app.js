@@ -156,7 +156,8 @@ app.post('/submit', (req, res) => {
                     const stringPart = part.toString();
                     const nameMatch = stringPart.match(/name="(.+?)"/);
                     const name = nameMatch ? nameMatch[1] : null;
-                    const acceptFilename = stringPart.split('filename=')[1].split('&')[0]; 
+                    const filenamePart = stringPart.split('filename=')[1];
+                    const acceptFilename = filenamePart ? filenamePart.split('&')[0] : null;
                     const platform = getPlatformFromFilename(acceptFilename);
                     const baseURL = "http://" + req.socket.localAddress.replace("::ffff:", "") + ":" + API_PORT;
 
