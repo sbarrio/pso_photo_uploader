@@ -138,7 +138,7 @@ app.post('/submit', (req, res) => {
                 return;
             }
 
-            // This way we about people sending aything bigger than GC screenshots
+            // This way we stop people sending aything bigger than GC screenshots
             if (contentLength > MAX_PHOTO_SIZE_BYTES) {
                 console.log(getFormattedDate(new Date()) + " - Photo is too big: " + contentLength + " bytes");
                 renderMessage(res, `<p>That photo is too big.</p><a href="/">Try with a different one.</a><br>`);   
